@@ -1,4 +1,4 @@
-#include "let/lexer.h"
+#include "packrat/lexer.h"
 
 #include <ranges>
 
@@ -6,7 +6,7 @@
 
 using namespace std::literals;
 
-namespace let {
+namespace packrat {
 
 namespace utf8 = fe::utf8;
 
@@ -29,9 +29,11 @@ Tok Lexer::lex() {
         if (accept(')')) return {loc_, Tok::Tag::D_paren_r};
         if (accept('=')) return {loc_, Tok::Tag::T_ass};
         if (accept(';')) return {loc_, Tok::Tag::T_semicolon};
-        if (accept('+')) return {loc_, Tok::Tag::O_add};
-        if (accept('-')) return {loc_, Tok::Tag::O_sub};
-        if (accept('*')) return {loc_, Tok::Tag::O_mul};
+        if (accept('*')) return {loc_, Tok::Tag::O_star};
+        if (accept('+')) return {loc_, Tok::Tag::O_plus};
+        if (accept('?')) return {loc_, Tok::Tag::O_opt};
+        if (accept('&')) return {loc_, Tok::Tag::O_and};
+        if (accept('!')) return {loc_, Tok::Tag::O_not};
         if (accept('/')) {
             if (accept('*')) {
                 eat_comments();
@@ -42,7 +44,7 @@ Tok Lexer::lex() {
                 continue;
             }
 
-            return {loc_, Tok::Tag::O_div};
+            return {loc_, Tok::Tag::O_alt};
         }
 
         // integer value
@@ -81,4 +83,4 @@ void Lexer::eat_comments() {
     }
 }
 
-} // namespace let
+} // namespace packrat

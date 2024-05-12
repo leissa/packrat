@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "let/ast.h"
+#include "packrat/ast.h"
 
-namespace let {
+namespace packrat {
 
 // stream
 
@@ -18,7 +18,7 @@ std::ostream& LitExpr::stream(std::ostream& o) const { return o << u64(); }
 std::ostream& SymExpr::stream(std::ostream& o) const { return o << sym(); }
 // clang-format on
 
-std::ostream& UnaryExpr::stream(std::ostream& o) const {
+std::ostream& PrefixExpr::stream(std::ostream& o) const {
     o << '(' << tag();
     rhs()->stream(o);
     return o << ')';
@@ -55,4 +55,4 @@ std::ostream& Prog::stream(std::ostream& o) const {
     return o;
 }
 
-} // namespace let
+} // namespace packrat

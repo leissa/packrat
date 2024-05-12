@@ -1,13 +1,14 @@
-#include "let/parser.h"
+#include "packrat/parser.h"
 
 #include <fstream>
 #include <iostream>
 
 using namespace std::literals;
 
-namespace let {
+namespace packrat {
 
-using Tag = Tok::Tag;
+using Tag  = Tok::Tag;
+using Prec = Tok::Prec;
 
 Parser::Parser(Driver& driver, std::istream& istream, const std::filesystem::path* path)
     : lexer_(driver, istream, path)
@@ -37,36 +38,41 @@ Sym Parser::parse_sym(std::string_view ctxt) {
 
 AST<Expr> Parser::parse_expr(std::string_view ctxt, Tok::Prec curr_prec) {
     auto track = tracker();
-    auto lhs   = parse_primary_or_unary_expr(ctxt);
+    auto lhs   = parse_primary_or_prefix_expr(ctxt);
 
     while (true) {
-        auto prec = Tok::bin_prec(ahead().tag());
-        if (prec <= curr_prec) break;
-        auto op  = lex().tag();
-        auto rhs = parse_expr("right-hand side of binary expression", prec);
-        lhs      = ast<BinExpr>(track, std::move(lhs), op, std::move(rhs));
+        switch (ahead().tag()) {
+            case Tag::O_alt: {
+                if (curr_prec >= Prec::Alt) return lhs;
+                auto op = lex().tag();
+                auto rhs = parse_expr("right-hand side of binary expression", Prec::Alt);
+                lhs      = ast<BinExpr>(track, std::move(lhs), op, std::move(rhs));
+                continue;
+            }
+            default: return lhs;
+        }
     }
 
     return lhs;
 }
 
-AST<Expr> Parser::parse_primary_or_unary_expr(std::string_view ctxt) {
+AST<Expr> Parser::parse_primary_or_prefix_expr(std::string_view ctxt) {
     switch (ahead().tag()) {
         case Tag::V_sym: return ast<SymExpr>(lex());
         case Tag::V_int: return ast<LitExpr>(lex());
+        case Tag::D_paren_l: {
+            lex();
+            auto expr = parse_expr("parenthesized expression");
+            expect(Tag::D_paren_r, "parenthesized expression");
+            return expr;
+        }
+        case Tag::O_and:
+        case Tag::O_not: {
+            auto track = tracker();
+            auto op    = lex().tag();
+            return ast<PrefixExpr>(track, op, parse_expr("operand of unary expression", Prec::Pre));
+        }
         default: break;
-    }
-
-    auto track = tracker();
-    if (auto prec = Tok::un_prec(ahead().tag()); prec != Tok::Prec::Error) {
-        auto op = lex().tag();
-        return ast<UnaryExpr>(track, op, parse_expr("operand of unary expression", prec));
-    }
-
-    if (accept(Tag::D_paren_l)) {
-        auto expr = parse_expr("parenthesized expression");
-        expect(Tag::D_paren_r, "parenthesized expression");
-        return expr;
     }
 
     if (!ctxt.empty()) {
@@ -120,4 +126,4 @@ AST<Prog> Parser::parse_prog() {
     }
 }
 
-} // namespace let
+} // namespace packrat

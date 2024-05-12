@@ -7,10 +7,10 @@
 
 #include <fe/lexer.h>
 
-#include "let/driver.h"
-#include "let/tok.h"
+#include "packrat/driver.h"
+#include "packrat/tok.h"
 
-namespace let {
+namespace packrat {
 
 class Lexer : public fe::Lexer<1, Lexer> {
 public:
@@ -26,4 +26,4 @@ private:
     fe::SymMap<Tok::Tag> keywords_;
 };
 
-} // namespace let
+} // namespace packrat

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(Let)
+project(packrat)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (default Debug)" FORCE)
@@ -37,27 +37,26 @@ endif()
 
 add_subdirectory(external/fe)
 
-add_executable(let)
-target_sources(let
+add_executable(packrat)
+target_sources(packrat
     PRIVATE
         src/main.cpp
-        src/let/eval.cpp
-        src/let/lexer.cpp
-        src/let/parser.cpp
-        src/let/stream.cpp
-        src/let/tok.cpp
-        include/let/ast.h
-        include/let/driver.h
-        include/let/lexer.h
-        include/let/tok.h
+        src/packrat/lexer.cpp
+        src/packrat/parser.cpp
+        src/packrat/stream.cpp
+        src/packrat/tok.cpp
+        include/packrat/ast.h
+        include/packrat/driver.h
+        include/packrat/lexer.h
+        include/packrat/tok.h
 )
-target_link_libraries(let PRIVATE fe)
-target_include_directories(let
+target_link_libraries(packrat PRIVATE fe)
+target_include_directories(packrat
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-target_compile_features(let PUBLIC cxx_std_${CMAKE_CXX_STANDARD})
+target_compile_features(packrat PUBLIC cxx_std_${CMAKE_CXX_STANDARD})
 if (MSVC AND BUILD_SHARED_LIBS AND FE_ABSL)
-    target_compile_definitions(liblet PUBLIC ABSL_CONSUME_DLL)
+    target_compile_definitions(libpackrat PUBLIC ABSL_CONSUME_DLL)
 endif()

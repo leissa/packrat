@@ -5,9 +5,9 @@
 
 #include <fe/cast.h>
 
-#include "let/tok.h"
+#include "packrat/tok.h"
 
-namespace let {
+namespace packrat {
 
 /// Base class for all @p Expr%essions.
 class Node : public fe::RuntimeCast<Node> {
@@ -39,7 +39,6 @@ class Expr : public Node {
 public:
     Expr(Loc loc)
         : Node(loc) {}
-    virtual uint64_t eval(Env&) const = 0;
 };
 
 class LitExpr : public Expr {
@@ -51,7 +50,6 @@ public:
     uint64_t u64() const { return u64_; }
 
     std::ostream& stream(std::ostream&) const override;
-    uint64_t eval(Env&) const override;
 
 private:
     uint64_t u64_;
@@ -66,15 +64,14 @@ public:
     Sym sym() const { return sym_; }
 
     std::ostream& stream(std::ostream&) const override;
-    uint64_t eval(Env&) const override;
 
 private:
     Sym sym_;
 };
 
-class UnaryExpr : public Expr {
+class PrefixExpr : public Expr {
 public:
-    UnaryExpr(Loc loc, Tok::Tag tag, AST<Expr>&& rhs)
+    PrefixExpr(Loc loc, Tok::Tag tag, AST<Expr>&& rhs)
         : Expr(loc)
         , tag_(tag)
         , rhs_(std::move(rhs)) {}
@@ -83,11 +80,27 @@ public:
     const Expr* rhs() const { return rhs_.get(); }
 
     std::ostream& stream(std::ostream&) const override;
-    uint64_t eval(Env&) const override;
 
 private:
     Tok::Tag tag_;
     AST<Expr> rhs_;
+};
+
+class PostfixExpr : public Expr {
+public:
+    PostfixExpr(Loc loc, AST<Expr>&& lhs, Tok::Tag tag)
+        : Expr(loc)
+        , lhs_(std::move(lhs))
+        , tag_(tag) {}
+
+    const Expr* lhs() const { return lhs_.get(); }
+    Tok::Tag tag() const { return tag_; }
+
+    std::ostream& stream(std::ostream&) const override;
+
+private:
+    AST<Expr> lhs_;
+    Tok::Tag tag_;
 };
 
 class BinExpr : public Expr {
@@ -103,7 +116,6 @@ public:
     const Expr* rhs() const { return rhs_.get(); }
 
     std::ostream& stream(std::ostream&) const override;
-    uint64_t eval(Env&) const override;
 
 private:
     AST<Expr> lhs_;
@@ -118,7 +130,6 @@ public:
         : Expr(loc) {}
 
     std::ostream& stream(std::ostream&) const override;
-    uint64_t eval(Env&) const override;
 };
 
 /*
@@ -131,7 +142,6 @@ public:
     Stmt(Loc loc)
         : Node(loc) {}
 
-    virtual void eval(Env&) const = 0;
 };
 
 class LetStmt : public Stmt {
@@ -145,7 +155,6 @@ public:
     const Expr* init() const { return init_.get(); }
 
     std::ostream& stream(std::ostream&) const override;
-    void eval(Env&) const override;
 
 private:
     Sym sym_;
@@ -162,7 +171,6 @@ public:
     const Expr* expr() const { return expr_.get(); }
 
     std::ostream& stream(std::ostream&) const override;
-    void eval(Env&) const override;
 
 private:
     Sym sym_;
@@ -182,11 +190,10 @@ public:
     const ASTs<Stmt>& stmts() const { return stmts_; }
 
     std::ostream& stream(std::ostream&) const override;
-    void eval() const;
 
 private:
     Sym sym_;
     ASTs<Stmt> stmts_;
 };
 
-} // namespace let
+} // namespace packrat

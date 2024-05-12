@@ -2,11 +2,11 @@
 
 #include <fe/parser.h>
 
-#include "let/ast.h"
-#include "let/driver.h"
-#include "let/lexer.h"
+#include "packrat/ast.h"
+#include "packrat/driver.h"
+#include "packrat/lexer.h"
 
-namespace let {
+namespace packrat {
 
 class Parser : public fe::Parser<Tok, Tok::Tag, 1, Parser> {
 public:
@@ -26,7 +26,7 @@ private:
     Sym parse_sym(std::string_view ctxt = {});
 
     AST<Expr> parse_expr(std::string_view ctxt, Tok::Prec = Tok::Prec::Bottom);
-    AST<Expr> parse_primary_or_unary_expr(std::string_view ctxt);
+    AST<Expr> parse_primary_or_prefix_expr(std::string_view ctxt);
 
     AST<Stmt> parse_let_stmt();
     AST<Stmt> parse_print_stmt();
@@ -46,4 +46,4 @@ private:
     friend class fe::Parser<Tok, Tok::Tag, 1, Parser>;
 };
 
-} // namespace let
+} // namespace packrat

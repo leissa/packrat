@@ -6,7 +6,7 @@
 #include <fe/loc.h>
 #include <fe/sym.h>
 
-namespace let {
+namespace packrat {
 
 using fe::Loc;
 using fe::Pos;
@@ -34,11 +34,14 @@ using fe::Sym;
 constexpr auto Num_Keys = 0 LET_KEY(CODE);
 #undef CODE
 
-#define LET_OP(m)      \
-    m(O_add, "+", Add) \
-    m(O_sub, "-", Add) \
-    m(O_mul, "*", Mul) \
-    m(O_div, "/", Mul) \
+#define LET_OP(m)        \
+    m(O_alt,  "/", Alt)  \
+    m(O_and,  "&", Pre)  \
+    m(O_not,  "!", Pre)  \
+    m(O_star, "*", Post) \
+    m(O_plus, "+", Post) \
+    m(O_opt,  "?", Post)
+// clang-format on
 
 class Tok {
 public:
@@ -59,9 +62,9 @@ public:
     enum class Prec {
         Error,
         Bottom,
-        Add,
-        Mul,
-        Unary,
+        Alt,
+        Pre,
+        Post,
     };
 
     Tok() {}
@@ -90,8 +93,6 @@ public:
     uint64_t u64() const { return u64_; }
 
     static std::string_view str(Tok::Tag);
-    static Prec un_prec(Tok::Tag);
-    static Prec bin_prec(Tok::Tag);
 
     friend std::ostream& operator<<(std::ostream&, Tag);
     friend std::ostream& operator<<(std::ostream&, Tok);
@@ -105,7 +106,6 @@ private:
     };
 };
 
-} // namespace let
+} // namespace packrat
 
-template<>
-struct std::formatter<let::Tok> : fe::ostream_formatter {};
+template<> struct std::formatter<packrat::Tok> : fe::ostream_formatter {};
