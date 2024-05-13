@@ -63,6 +63,7 @@ public:
         Error,
         Bottom,
         Alt,
+        Seq,
         Pre,
         Post,
     };

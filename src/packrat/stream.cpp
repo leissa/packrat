@@ -19,15 +19,25 @@ std::ostream& SymExpr::stream(std::ostream& o) const { return o << sym(); }
 // clang-format on
 
 std::ostream& PrefixExpr::stream(std::ostream& o) const {
-    o << '(' << tag();
-    rhs()->stream(o);
-    return o << ')';
+    return rhs()->stream(o << tag() << '(') << ')';
+}
+
+std::ostream& PostfixExpr::stream(std::ostream& o) const {
+    return lhs()->stream(o << '(') << ')' << tag();
 }
 
 std::ostream& BinExpr::stream(std::ostream& o) const {
     o << '(';
     lhs()->stream(o);
     o << ' ' << tag() << ' ';
+    rhs()->stream(o);
+    return o << ')';
+}
+
+std::ostream& SeqExpr::stream(std::ostream& o) const {
+    o << '(';
+    lhs()->stream(o);
+    o << ' ';
     rhs()->stream(o);
     return o << ')';
 }

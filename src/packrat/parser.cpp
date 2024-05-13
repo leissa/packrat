@@ -1,7 +1,16 @@
 #include "packrat/parser.h"
 
-#include <fstream>
 #include <iostream>
+
+// clang-format off
+#define C_EXPR           \
+              D_paren_l: \
+    case Tag::V_sym:     \
+    case Tag::O_and:     \
+    case Tag::O_not
+// clang-format on
+
+/* case Tag::O_alt:     \ */
 
 using namespace std::literals;
 
@@ -44,9 +53,23 @@ AST<Expr> Parser::parse_expr(std::string_view ctxt, Tok::Prec curr_prec) {
         switch (ahead().tag()) {
             case Tag::O_alt: {
                 if (curr_prec >= Prec::Alt) return lhs;
-                auto op = lex().tag();
+                auto op  = lex().tag();
                 auto rhs = parse_expr("right-hand side of binary expression", Prec::Alt);
                 lhs      = ast<BinExpr>(track, std::move(lhs), op, std::move(rhs));
+                continue;
+            }
+            case Tag::O_star:
+            case Tag::O_plus:
+            case Tag::O_opt: {
+                if (curr_prec >= Prec::Post) return lhs;
+                auto op = lex().tag();
+                lhs     = ast<PostfixExpr>(track, std::move(lhs), op);
+                continue;
+            }
+            case Tag::C_EXPR: {
+                auto track = tracker();
+                auto rhs   = parse_expr({}, Prec::Seq);
+                lhs        = ast<SeqExpr>(track, std::move(lhs), std::move(rhs));
                 continue;
             }
             default: return lhs;

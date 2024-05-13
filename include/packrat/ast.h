@@ -123,6 +123,23 @@ private:
     AST<Expr> rhs_;
 };
 
+class SeqExpr : public Expr {
+public:
+    SeqExpr(Loc loc, AST<Expr>&& lhs, AST<Expr>&& rhs)
+        : Expr(loc)
+        , lhs_(std::move(lhs))
+        , rhs_(std::move(rhs)) {}
+
+    const Expr* lhs() const { return lhs_.get(); }
+    const Expr* rhs() const { return rhs_.get(); }
+
+    std::ostream& stream(std::ostream&) const override;
+
+private:
+    AST<Expr> lhs_;
+    AST<Expr> rhs_;
+};
+
 /// Just a dummy that does nothing and will only be constructed during parse errors.
 class ErrExpr : public Expr {
 public:
