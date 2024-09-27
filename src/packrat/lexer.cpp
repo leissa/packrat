@@ -15,7 +15,7 @@ Lexer::Lexer(Driver& driver, std::istream& istream, const std::filesystem::path*
     , driver_(driver) {
     if (!istream_) throw std::runtime_error("stream is bad");
 #define CODE(t, str) keywords_[driver_.sym(str)] = Tok::Tag::t;
-    LET_KEY(CODE)
+    RAT_KEY(CODE)
 #undef CODE
 }
 

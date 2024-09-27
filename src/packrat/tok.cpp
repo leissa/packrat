@@ -10,13 +10,13 @@ std::string_view Tok::str(Tok::Tag tag) {
     switch (tag) {
 #define CODE(t, str) \
     case Tok::Tag::t: return str##sv;
-        LET_KEY(CODE)
-        LET_VAL(CODE)
-        LET_TOK(CODE)
+        RAT_KEY(CODE)
+        RAT_VAL(CODE)
+        RAT_TOK(CODE)
 #undef CODE
 #define CODE(t, str, prec) \
     case Tok::Tag::t: return str##sv;
-        LET_OP(CODE)
+        RAT_OP(CODE)
 #undef CODE
         default: fe::unreachable();
     }

@@ -42,6 +42,17 @@ Sym Parser::parse_sym(std::string_view ctxt) {
 }
 
 /*
+ * Decl
+ */
+
+AST<Decl> Parser::parse_category_decl() {
+    auto track = tracker();
+    eat(Tag::K_category);
+    auto sym = parse_sym();
+    return ast<SyntaxCatDecl>(track, sym);
+}
+
+/*
  * Expr
  */
 
@@ -107,43 +118,20 @@ AST<Expr> Parser::parse_primary_or_prefix_expr(std::string_view ctxt) {
 }
 
 /*
- * Stmt
- */
-
-AST<Stmt> Parser::parse_let_stmt() {
-    auto track = tracker();
-    eat(Tag::K_let);
-    auto sym = parse_sym("name of a let-statement");
-    expect(Tag::T_ass, "let-statement");
-    auto init = parse_expr("initialization expression of a let-statement");
-    expect(Tag::T_semicolon, "return-statement");
-    return ast<LetStmt>(track, sym, std::move(init));
-}
-
-AST<Stmt> Parser::parse_print_stmt() {
-    auto track = tracker();
-    eat(Tag::K_print);
-    auto expr = parse_expr("print-statement");
-    expect(Tag::T_semicolon, "print-statement");
-    return ast<PrintStmt>(track, std::move(expr));
-}
-
-/*
  * Prog
  */
 
 AST<Prog> Parser::parse_prog() {
     auto track = tracker();
-    ASTs<Stmt> stmts;
+    ASTs<Decl> decls;
     while (true) {
         // clang-format off
         switch (ahead().tag()) {
-            case Tag::K_let:   stmts.emplace_back(parse_let_stmt());   break;
-            case Tag::K_print: stmts.emplace_back(parse_print_stmt()); break;
-            case Tag::EoF:     return ast<Prog>(track, std::move(stmts));
+            case Tag::K_category:   decls.emplace_back(parse_category_decl());   break;
+            case Tag::EoF:          return ast<Prog>(track, std::move(decls));
             default:
                 auto tok = lex();
-                driver().err(tok.loc(), "expected statement, got '{}' while parsing program", tok);
+                driver().err(tok.loc(), "expected declaration, got '{}' while parsing program", tok);
         }
         // clang-format on
     }

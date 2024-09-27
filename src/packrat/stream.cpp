@@ -9,6 +9,12 @@ namespace packrat {
 void Node::dump() const { stream(std::cout); }
 
 /*
+ * Decl
+ */
+
+std::ostream& SyntaxCatDecl::stream(std::ostream& o) const { return o << "category " << sym(); }
+
+/*
  * Expr
  */
 
@@ -43,25 +49,11 @@ std::ostream& SeqExpr::stream(std::ostream& o) const {
 }
 
 /*
- * Stmt
- */
-
-std::ostream& LetStmt::stream(std::ostream& o) const {
-    o << "let " << sym() << " = ";
-    return init()->stream(o) << ';' << std::endl;
-}
-
-std::ostream& PrintStmt::stream(std::ostream& o) const {
-    o << "print ";
-    return expr()->stream(o) << ';' << std::endl;
-}
-
-/*
  * Prog
  */
 
 std::ostream& Prog::stream(std::ostream& o) const {
-    for (auto&& stmt : stmts()) stmt->stream(o);
+    for (auto&& decl : decls()) decl->stream(o) << std::endl;
     return o;
 }
 

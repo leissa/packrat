@@ -25,11 +25,10 @@ private:
 
     Sym parse_sym(std::string_view ctxt = {});
 
+    AST<Decl> parse_category_decl();
+
     AST<Expr> parse_expr(std::string_view ctxt, Tok::Prec = Tok::Prec::Bottom);
     AST<Expr> parse_primary_or_prefix_expr(std::string_view ctxt);
-
-    AST<Stmt> parse_let_stmt();
-    AST<Stmt> parse_print_stmt();
 
     /// Issue an error message of the form:
     /// `expected <what>, got '<tok>' while parsing <ctxt>`

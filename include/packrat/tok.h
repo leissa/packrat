@@ -13,15 +13,16 @@ using fe::Pos;
 using fe::Sym;
 
 // clang-format off
-#define LET_KEY(m)      \
-    m(K_let,   "let")   \
-    m(K_print, "print") \
+#define RAT_KEY(m)              \
+    m(K_category,   "category") \
+    m(K_notation,   "notation") \
+    m(K_macro,      "macro")    \
 
-#define LET_VAL(m)                        \
+#define RAT_VAL(m)                        \
     m(V_int,        "<interger literal>") \
     m(V_sym,        "<identifier>")       \
 
-#define LET_TOK(m)                   \
+#define RAT_TOK(m)                   \
     m(EoF,          "<end of file>") \
     /* delimiter */                  \
     m(D_paren_l,    "(")             \
@@ -31,10 +32,10 @@ using fe::Sym;
     m(T_semicolon,  ";")             \
 
 #define CODE(t, str) + 1
-constexpr auto Num_Keys = 0 LET_KEY(CODE);
+constexpr auto Num_Keys = 0 RAT_KEY(CODE);
 #undef CODE
 
-#define LET_OP(m)        \
+#define RAT_OP(m)        \
     m(O_alt,  "/", Alt)  \
     m(O_and,  "&", Pre)  \
     m(O_not,  "!", Pre)  \
@@ -49,12 +50,12 @@ public:
     enum class Tag {
         Nil,
 #define CODE(t, _) t,
-        LET_KEY(CODE)
-        LET_VAL(CODE)
-        LET_TOK(CODE)
+        RAT_KEY(CODE)
+        RAT_VAL(CODE)
+        RAT_TOK(CODE)
 #undef CODE
 #define CODE(t, str, prec) t,
-        LET_OP (CODE)
+        RAT_OP (CODE)
 #undef CODE
     };
     // clang-format on

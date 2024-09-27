@@ -31,6 +31,31 @@ template<class T> using ASTs = std::deque<AST<T>>;
 using Env                    = fe::SymMap<uint64_t>;
 
 /*
+ * Decl
+ */
+
+/// Base class for all @p Decl%arations.
+class Decl : public Node {
+public:
+    Decl(Loc loc)
+        : Node(loc) {}
+};
+
+class SyntaxCatDecl : public Decl {
+public:
+    SyntaxCatDecl(Loc loc, Sym sym)
+        : Decl(loc)
+        , sym_(sym) {}
+
+    Sym sym() const { return sym_; }
+
+    std::ostream& stream(std::ostream& o) const override;
+
+private:
+    Sym sym_;
+};
+
+/*
  * Expr
  */
 
@@ -150,67 +175,22 @@ public:
 };
 
 /*
- * Stmt
- */
-
-/// Base class for all @p Stmt%ements.
-class Stmt : public Node {
-public:
-    Stmt(Loc loc)
-        : Node(loc) {}
-
-};
-
-class LetStmt : public Stmt {
-public:
-    LetStmt(Loc loc, Sym sym, AST<Expr>&& init)
-        : Stmt(loc)
-        , sym_(sym)
-        , init_(std::move(init)) {}
-
-    Sym sym() const { return sym_; }
-    const Expr* init() const { return init_.get(); }
-
-    std::ostream& stream(std::ostream&) const override;
-
-private:
-    Sym sym_;
-    AST<Expr> init_;
-};
-
-class PrintStmt : public Stmt {
-public:
-    PrintStmt(Loc loc, AST<Expr>&& expr)
-        : Stmt(loc)
-        , expr_(std::move(expr)) {}
-
-    Sym sym() const { return sym_; }
-    const Expr* expr() const { return expr_.get(); }
-
-    std::ostream& stream(std::ostream&) const override;
-
-private:
-    Sym sym_;
-    AST<Expr> expr_;
-};
-
-/*
  * Prog
  */
 
 class Prog : public Node {
 public:
-    Prog(Loc loc, ASTs<Stmt>&& stmts)
+    Prog(Loc loc, ASTs<Decl>&& decls)
         : Node(loc)
-        , stmts_(std::move(stmts)) {}
+        , decls_(std::move(decls)) {}
 
-    const ASTs<Stmt>& stmts() const { return stmts_; }
+    const ASTs<Decl>& decls() const { return decls_; }
 
     std::ostream& stream(std::ostream&) const override;
 
 private:
     Sym sym_;
-    ASTs<Stmt> stmts_;
+    ASTs<Decl> decls_;
 };
 
 } // namespace packrat
