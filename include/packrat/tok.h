@@ -21,6 +21,7 @@ using fe::Sym;
 #define RAT_VAL(m)                        \
     m(V_int,        "<interger literal>") \
     m(V_sym,        "<identifier>")       \
+    m(V_any,        "<any>")             \
 
 #define RAT_TOK(m)                   \
     m(EoF,          "<end of file>") \
@@ -73,9 +74,9 @@ public:
     Tok(Loc loc, Tag tag)
         : loc_(loc)
         , tag_(tag) {}
-    Tok(Loc loc, Sym sym)
+    Tok(Loc loc, Tag tag, Sym sym)
         : loc_(loc)
-        , tag_(Tag::V_sym)
+        , tag_(tag)
         , sym_(sym) {}
     Tok(Loc loc, uint64_t u64)
         : loc_(loc)
@@ -86,10 +87,15 @@ public:
     Tag tag() const { return tag_; }
     bool isa(Tag tag) const { return tag == tag_; }
     bool isa_key() const { return (int)tag() < Num_Keys; }
+    bool any(Sym sym) const {
+        if (tag() == Tag::V_any || tag() == Tag::V_sym) return sym == sym_;
+        // TODO other tokens
+        return false;
+    }
     explicit operator bool() const { return tag_ != Tag::Nil; }
 
     Sym sym() const {
-        assert(isa(Tag::V_sym));
+        assert(isa(Tag::V_sym) || isa(Tag::V_any));
         return sym_;
     }
     uint64_t u64() const { return u64_; }
